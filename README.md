@@ -1,4 +1,2 @@
-# Conics
-This is my official github repo created for study of Conic sections.
-
-For more info, refer my koch-snowflake repo.
+# Python and Java FX projects
+This is my official github repo created for learning Python and JavaFX.
