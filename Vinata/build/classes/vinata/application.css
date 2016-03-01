@@ -8,3 +8,23 @@ and open the template in the editor.
     Author     : Horopter
 */
 
+.label{
+    -fx-text-alignment: right;
+    -fx-fill: #FFFFFF;
+    -fx-background-fills: #FFFFFF;
+    -fx-background-insets: 15 15 15 15;
+    -fx-effect: dropshadow(two-pass-box , whitesmoke, 5, 0.0 , 2, 3);
+    -fx-opacity: 40;
+    -fx-text-fill: #808080;
+    -fx-font: 28px sans-serif;
+}
+.button{
+    -fx-background-color: #00C78C;
+    -fx-text-fill: #FFFFFF; 
+}
+.button:pressed{
+    -fx-background-color: #6600FF;
+}
+.root{
+    -fx-background-color: #F0F8FF;
+}

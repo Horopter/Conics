@@ -53,7 +53,7 @@ public class FXMLDocumentController
         if(!(model.isOperator(init1)||model.isParen(init1)||model.isExtra(init1)))
         {
             //System.out.println(init2+"_"+init1);
-            if(!arrayList.isEmpty()&&!model.isOperator(arrayList.get(arrayList.size()-1)))
+            if(!arrayList.isEmpty()&&!model.isOperator(arrayList.get(arrayList.size()-1))&&!model.isParen(arrayList.get(arrayList.size()-1))&&!model.isExtra(arrayList.get(arrayList.size()-1)))
             {
                 if(dot&&init1.equals("."))
                     init1="";
@@ -72,6 +72,7 @@ public class FXMLDocumentController
         {
             arrayList.add(init1);
             input.setText(input.getText()+init1);
+            init2="";
         }
         else if(model.isOperator(init1))
         {
@@ -150,9 +151,9 @@ public class FXMLDocumentController
     }
     public void mEvaluate(ActionEvent event)
     {
-        //for (String i : arrayList) {
-          //  System.out.println(i);
-        //}
+        for (String i : arrayList) {
+            System.out.println(i);
+        }
         try{
         ArrayList<String> res;
         res = model.getPostOrder(arrayList);
@@ -167,7 +168,8 @@ public class FXMLDocumentController
         }
         catch(Exception e)
         {
-            result.setText("Parenthesis error");
+            e.printStackTrace();
+            //result.setText("Parenthesis error");
         }
     }
     public void clear(ActionEvent event)

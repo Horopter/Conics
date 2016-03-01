@@ -9,6 +9,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 /**
@@ -25,6 +26,7 @@ public class Vinata extends Application {
         scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
         stage.setTitle("Vinata Calculator");
         stage.setResizable(false);
+        stage.getIcons().add(new Image(Vinata.class.getResourceAsStream( "logo.jpg" )));
         stage.setScene(scene);
         stage.show();
         }
