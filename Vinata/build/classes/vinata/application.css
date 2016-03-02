@@ -16,7 +16,7 @@ and open the template in the editor.
     -fx-effect: dropshadow(two-pass-box , whitesmoke, 5, 0.0 , 2, 3);
     -fx-opacity: 40;
     -fx-text-fill: #808080;
-    -fx-font: 28px sans-serif;
+    -fx-font: 18px sans-serif;
 }
 .button{
     -fx-background-color: #00C78C;
