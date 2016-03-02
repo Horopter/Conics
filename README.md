@@ -3,7 +3,7 @@ This is my official github repo created for learning Python and JavaFX.
 
 # Vinata Calculator Released on 2nd March 2016
 ==============================================
-![alt tag](Demo-Vinata.png)
+![alt tag](Demo-Vinata.PNG)
 
 - [x] Floating point Exponentiation
 - [x] Calculations involving transcendent numbers with java precision
