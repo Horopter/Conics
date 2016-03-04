@@ -35,51 +35,22 @@
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="(">
+            <Button mnemonicParsing="false" onAction="#leftParenHandler" prefWidth="50.0" text="(">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text=")">
+            <Button mnemonicParsing="false" onAction="#rightParenHandler" prefWidth="50.0" text=")">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="^">
+            <Button mnemonicParsing="false" onAction="#operatorHandler" prefWidth="50.0" text="^">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="←">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-         </children>
-      </HBox>
-      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="300.0" spacing="10.0">
-         <children>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="7">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="8">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="9">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="/">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="e">
+            <Button mnemonicParsing="false" onAction="#extraHandler" prefWidth="50.0" text="←">
                <font>
                   <Font size="18.0" />
                </font>
@@ -88,56 +59,27 @@
       </HBox>
       <HBox alignment="CENTER" prefHeight="50.0" prefWidth="300.0" spacing="10.0">
          <children>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="4">
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="7">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="5">
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="8">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="6">
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="9">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="*">
+            <Button mnemonicParsing="false" onAction="#operatorHandler" prefWidth="50.0" text="/">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="π">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-         </children>
-      </HBox>
-      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="300.0" spacing="10.0">
-         <children>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="1">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="2">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="3">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="-">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="r">
+            <Button mnemonicParsing="false" onAction="#extraHandler" prefWidth="50.0" text="e">
                <font>
                   <Font size="18.0" />
                </font>
@@ -146,12 +88,70 @@
       </HBox>
       <HBox alignment="CENTER" prefHeight="50.0" prefWidth="300.0" spacing="10.0">
          <children>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text=".">
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="4">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="0">
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="5">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="6">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#operatorHandler" prefWidth="50.0" text="*">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#extraHandler" prefWidth="50.0" text="π">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="300.0" spacing="10.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="1">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="2">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="3">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#operatorHandler" prefWidth="50.0" text="-">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#extraHandler" prefWidth="50.0" text="r">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="50.0" prefWidth="300.0" spacing="10.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text=".">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#numberHandler" prefWidth="50.0" text="0">
                <font>
                   <Font size="18.0" />
                </font>
@@ -161,12 +161,12 @@
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="+">
+            <Button mnemonicParsing="false" onAction="#operatorHandler" prefWidth="50.0" text="+">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#uInput" prefWidth="50.0" text="√">
+            <Button mnemonicParsing="false" onAction="#extraHandler" prefWidth="50.0" text="√">
                <font>
                   <Font size="18.0" />
                </font>

@@ -106,11 +106,22 @@ public class Model {
     {
         return init1.contains("(")||init1.contains(")");
     }
+    public boolean isLParen(String init1)
+    {
+        return init1.contains("(");
+    }
+    public boolean isRParen(String init1)
+    {
+        return init1.contains(")");
+    }
     public boolean isExtra(String init1)
     {
         return (init1.contains("e")||init1.contains("r")||init1.contains("←")||init1.contains("π")||init1.contains("√"));
     }
     public String removeLastChar(String str) {
-        return str.substring(0,str.length()-1);
+        if(str.length()!=0)
+            return str.substring(0,str.length()-1);
+        else 
+            return str;  
     }
 }

@@ -11,6 +11,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyEvent;
 
 /**
  *
@@ -27,9 +28,57 @@ public class FXMLDocumentController
     String init1 ="";
     String init2 = "";
     double sol=0;
+    int leftparen=0;
     private boolean dot = false;
     private final Model model = new Model();
-    public void uInput(ActionEvent event)
+    public void operatorHandler(ActionEvent event)
+    {
+        if(sol<0)
+        {
+            input.setText(Double.toString(sol));
+            arrayList.clear();
+            arrayList.add(0, Double.toString(0));
+            arrayList.add(1,"-");
+            arrayList.add(2, Double.toString(-sol));
+            init2=Double.toString(sol);
+            sol=0;
+        }
+        else if(sol!=0)
+        {
+            input.setText(Double.toString(sol));
+            arrayList.clear();
+            arrayList.add(0, Double.toString(sol));
+            init2=Double.toString(sol);
+            sol=0;
+        }
+        init1 = ((Button)event.getSource()).getText();
+        if(model.isOperator(init1))
+        {
+            if(arrayList.isEmpty())
+            {
+                input.setText("0");
+                arrayList.add(Double.toString(0));
+            }
+            else 
+            {
+                if(arrayList.get((arrayList.size()-1)).equals("("))
+                {
+                    if(init1.contentEquals("+")||init1.contentEquals("-")||init1.contentEquals("^"))
+                        arrayList.add("0");
+                    else if(init1.contentEquals("*")||init1.contentEquals("/"))
+                        arrayList.add("1");
+                }
+                else if(model.isOperator(arrayList.get((arrayList.size()-1))))
+                        init1="";
+            }
+            if(!init1.equals(""))
+                arrayList.add(init1);
+            dot = false;
+            init2="";//avoiding multiple attachment
+            input.setText(input.getText()+init1);
+        }
+    }
+    public void numberHandler(ActionEvent event)
     {
         if(sol<0)
         {
@@ -53,30 +102,39 @@ public class FXMLDocumentController
         //Fault in Sameer's calci : Multiple digit contingency
         if(!(model.isOperator(init1)||model.isParen(init1)||model.isExtra(init1)))
         {
-            //System.out.println(init2+"_"+init1);
             if(!arrayList.isEmpty())
             {
-            if(input.getText().endsWith("e")||input.getText().endsWith("π"))
-            {
-                input.setText(input.getText()+"*");
-                arrayList.add("*");
-                arrayList.add(init1);
-            }
-            else if(!model.isOperator(arrayList.get(arrayList.size()-1))&&!model.isParen(arrayList.get(arrayList.size()-1))&&!model.isExtra(arrayList.get(arrayList.size()-1)))
-            {
-                if(dot&&init1.equals("."))
-                    init1="";
-                else if(init1.equals("."))
-                    dot=true;
-                init2 = arrayList.get((arrayList.size()-1)) + init1;
-                arrayList.remove((arrayList.size()-1));
-                arrayList.add(init2);
-            } 
-            else if(")".equals(arrayList.get(arrayList.size()-1)))
-            {
-                arrayList.add("*");
-                arrayList.add(init1);
-            }
+                //isExtra
+                if(input.getText().endsWith("e")||input.getText().endsWith("π"))
+                {
+                    input.setText(input.getText()+"*");
+                    arrayList.add("*");
+                    arrayList.add(init1);
+                }
+                //is a Decimal Number
+                else if(!model.isOperator(arrayList.get(arrayList.size()-1))&&!model.isParen(arrayList.get(arrayList.size()-1))&&!model.isExtra(arrayList.get(arrayList.size()-1)))
+                {
+                    if(dot&&init1.equals("."))
+                        init1="";
+                    else if(init1.equals("."))
+                        dot=true;
+                    init2 = arrayList.get((arrayList.size()-1)) + init1;
+                    arrayList.remove((arrayList.size()-1));
+                    arrayList.add(init2);
+                } 
+                //is a right paren
+                else if(")".equals(arrayList.get(arrayList.size()-1)))
+                {
+                    arrayList.add("*");
+                    arrayList.add(init1);
+                }
+                //is an operator or a left paren
+                else if(model.isOperator(arrayList.get(arrayList.size()-1))||"(".equals(arrayList.get(arrayList.size()-1)))
+                {
+                    init2=init2+init1;
+                    arrayList.add(init1);
+                }
+
             }
             else
             {
@@ -87,32 +145,163 @@ public class FXMLDocumentController
             input.setText(input.getText()+init1);
             
         }
-        else if(model.isParen(init1))
+    }
+    public void leftParenHandler(ActionEvent event)
+    {
+        leftparen++;
+        if(sol<0)
+        {
+            input.setText(Double.toString(sol));
+            arrayList.clear();
+            arrayList.add(0, Double.toString(0));
+            arrayList.add(1,"-");
+            arrayList.add(2, Double.toString(-sol));
+            init2=Double.toString(sol);
+            sol=0;
+        }
+        else if(sol!=0)
+        {
+            input.setText(Double.toString(sol));
+            arrayList.clear();
+            arrayList.add(0, Double.toString(sol));
+            init2=Double.toString(sol);
+            sol=0;
+        }
+        init1 = ((Button)event.getSource()).getText();
+        if(!arrayList.isEmpty()) 
+        {
+            String x = arrayList.get(arrayList.size()-1);
+            //if Extra
+            if(model.isExtra(x)||model.isRParen(x))
+            {
+                arrayList.add("*");
+                arrayList.add(init1);
+                input.setText(input.getText()+"*"+init1);
+                init2="";
+            }
+            //if left paren or an operator or a number
+            else if(model.isLParen(x)||model.isOperator(x))
+            {
+                arrayList.add(init1);
+                input.setText(input.getText()+init1);
+                init2="";
+            }
+            else
+            {
+                arrayList.add(init1);
+                input.setText(input.getText()+init1);
+                init2="";
+            }
+        }
+        else
         {
             arrayList.add(init1);
             input.setText(input.getText()+init1);
             init2="";
         }
-        else if(model.isOperator(init1))
+    }
+    public void rightParenHandler(ActionEvent event)
+    {
+        if(sol<0)
         {
-            if(arrayList.isEmpty())
-            {
-                input.setText("0");
-                arrayList.add(Double.toString(0));
-            }
-            else if(arrayList.get((arrayList.size()-1)).equals("("))
-            {
-                arrayList.add("0");
-            }
-            else if(model.isOperator(arrayList.get((arrayList.size()-1))))
-                    init1="";
-            if(!init1.equals(""))
-                arrayList.add(init1);
-            dot = false;
-            init2="";//avoiding multiple attachment
-            input.setText(input.getText()+init1);
+            input.setText(Double.toString(sol));
+            arrayList.clear();
+            arrayList.add(0, Double.toString(0));
+            arrayList.add(1,"-");
+            arrayList.add(2, Double.toString(-sol));
+            init2=Double.toString(sol);
+            sol=0;
         }
-        else if(model.isExtra(init1))
+        else if(sol!=0)
+        {
+            input.setText(Double.toString(sol));
+            arrayList.clear();
+            arrayList.add(0, Double.toString(sol));
+            init2=Double.toString(sol);
+            sol=0;
+        }
+        init1 = ((Button)event.getSource()).getText();
+        if(!arrayList.isEmpty()) 
+        {
+            if(leftparen>0)
+                leftparen--;
+            else return;
+            String x = arrayList.get(arrayList.size()-1);
+            System.out.print(model.isLParen(x));
+            //if left paren
+            if(model.isLParen(x))
+            {
+                System.out.println("yaaas");
+                arrayList.add("0");
+                arrayList.add(init1);
+                input.setText(input.getText()+init1);
+                init2="";
+            }
+            //if Extra
+            else if(model.isExtra(x))
+            {
+                arrayList.add(init1);
+                input.setText(input.getText()+init1);
+                init2="";
+            }
+            //if right paren
+            else if(model.isRParen(init1))
+            {
+                if(leftparen>=0)
+                {
+                    arrayList.add(init1);
+                    input.setText(input.getText()+init1);
+                    init2="";
+                }
+            }
+            // if an operator
+            else if(model.isOperator(x))
+            {
+                String y = null;
+                if(x.equals("+")||x.equals("-")||x.equals("^"))
+                {
+                    y="0";
+                }
+                else
+                {
+                    y="1";
+                }
+                arrayList.add(y);
+                arrayList.add(init1);
+                input.setText(input.getText()+init1);
+                init2="";
+            }
+            //if a number
+            else
+            {
+                arrayList.add(init1);
+                input.setText(input.getText()+init1);
+                init2="";
+            }
+        }
+    }
+    public void extraHandler(ActionEvent event)
+    {
+        if(sol<0)
+        {
+            input.setText(Double.toString(sol));
+            arrayList.clear();
+            arrayList.add(0, Double.toString(0));
+            arrayList.add(1,"-");
+            arrayList.add(2, Double.toString(-sol));
+            init2=Double.toString(sol);
+            sol=0;
+        }
+        else if(sol!=0)
+        {
+            input.setText(Double.toString(sol));
+            arrayList.clear();
+            arrayList.add(0, Double.toString(sol));
+            init2=Double.toString(sol);
+            sol=0;
+        }
+        init1 = ((Button)event.getSource()).getText();
+        if(model.isExtra(init1))
         {
             if(init1.contentEquals("e"))
             {
@@ -213,12 +402,11 @@ public class FXMLDocumentController
             }
             else if(init1.contentEquals("←"))
             {
-                //for (String i : arrayList) {
-                  //  System.out.println(i);
-                //}
                 if(!arrayList.isEmpty())
                 {
                 String y = arrayList.get((arrayList.size()-1));
+                if(y.equals("("))
+                    leftparen--;
                 y = model.removeLastChar(y);
                 arrayList.remove((arrayList.size()-1));
                 arrayList.add(y);
@@ -234,6 +422,14 @@ public class FXMLDocumentController
     {
         for (String i : arrayList) {
             System.out.println(i);
+        }
+        if(arrayList.isEmpty())
+        {
+            arrayList.add("0");
+        }
+        else
+        {
+            String x = arrayList.get(arrayList.size()-1);
         }
         try{
         ArrayList<String> res;
@@ -261,10 +457,10 @@ public class FXMLDocumentController
         init1 = "";
         init2 ="";
         dot=false;
+        leftparen=0;
         input.setText("");
         result.setText("0");
         arrayList.clear();
         sol=0;
     }
-    
 }
