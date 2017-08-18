@@ -17,8 +17,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,16 +33,17 @@ class FileThread extends Thread {
     String name, sentinel;
     String filename;
     Socket threadSocket;
-    int threadCounter;
+    public int threadId;
     String folderName;
     int fileCount;
     int size = 65535;
     BufferedReader bufferedReader;
     int progress = 0;
+    public String Username;
 
     public FileThread(Socket socket, int cnt, String folder) {
         threadSocket = socket;
-        threadCounter = cnt;
+        threadId = cnt;
         folderName = folder;
     }
 
@@ -58,6 +57,8 @@ class FileThread extends Thread {
             try (InputStream inputStream = threadSocket.getInputStream()) {
                 outputStream = threadSocket.getOutputStream();
                 objectOutputStream = null;
+                Username = bufferedReader.readLine();
+                System.out.println("They say their name is : "+ Username + ". Say Hi!");
                 String command = bufferedReader.readLine();
                 if ("askDetails".equals(command)) {
                     askDetails(inputStream, outputStream, objectOutputStream);
@@ -100,9 +101,10 @@ class FileThread extends Thread {
         }
     }
 
-    private void //<editor-fold defaultstate="collapsed" desc="TCP connection to get only file details.">
-            askDetails //</editor-fold>
-            (InputStream inputStream, OutputStream outputStream, ObjectOutputStream objectOutputStream) throws IOException {
+//<editor-fold defaultstate="expanded" desc="TCP connection to get only file details.">
+        private void askDetails 
+//</editor-fold>
+        (InputStream inputStream, OutputStream outputStream, ObjectOutputStream objectOutputStream) throws IOException {
         File ff = new File(folderName);
         ArrayList<String> names = new ArrayList<>(Arrays.asList(ff.list()));
         objectOutputStream = new ObjectOutputStream(outputStream);
@@ -117,11 +119,15 @@ class FileThread extends Thread {
 
     private void importFiles(InputStream inputStream) throws IOException {
         System.out.println("Request to upload file " + name + " recieved from " + threadSocket.getInetAddress().getHostName() + "...");
-        File folder = new File(folderName);
-        if (!folder.exists()) {
+        File folder = new File(folderName);        
+        if (!folder.exists()) 
+        //<editor-fold defaultstate="expanded" desc="if">
+        {
             folder.mkdir();
         }
-        File fc = new File(folder, name);
+        //</editor-fold>
+        name = getStorageFilename();
+        File fc = new File(folder, name);        
         long filesize = Integer.parseInt(bufferedReader.readLine());
         try (FileOutputStream fileOutputStream = new FileOutputStream(fc)) {
             DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream);
@@ -132,14 +138,20 @@ class FileThread extends Thread {
     private void exportFiles(OutputStream outputStream, ObjectOutputStream objectOutputStream) throws IOException {
         int end = name.lastIndexOf("|");
         filename = name.substring(1, end);
-        if (!"".equals(filename)) {
+        
+        if (!"".equals(filename)) 
+        //<editor-fold defaultstate="expanded" desc="if">
+        {
             FileInputStream file = null;
             BufferedInputStream bufferedInputStream = null;
             boolean fileExists;
             filename = folderName + File.separator + filename;
             File downloadFile = new File(filename);
             fileExists = downloadFile.exists();
-            if (fileExists) {
+            
+            if (fileExists) 
+            //<editor-fold defaultstate="expanded" desc="if">
+            {
                 file = new FileInputStream(filename);
                 bufferedInputStream = new BufferedInputStream(file);
                 objectOutputStream = new ObjectOutputStream(outputStream);
@@ -151,16 +163,22 @@ class FileThread extends Thread {
                 file.close();
                 objectOutputStream.close();
                 outputStream.close();
-            } else {
+            }
+            //<editor-fold>            
+            else //<editor-fold defaultstate="expanded" desc="else">
+            {
                 objectOutputStream = new ObjectOutputStream(outputStream);
                 objectOutputStream.writeObject("FileNotFound");
+                //<editor-fold defaultstate="expanded" desc="if">
                 if (bufferedInputStream != null && file != null) {
                     bufferedInputStream.close();
                     file.close();
                 }
+                //</editor-fold>
                 objectOutputStream.close();
                 outputStream.close();
             }
+            //</editor-fold>
         }
     }
 
@@ -210,5 +228,10 @@ class FileThread extends Thread {
     private String decodeName(String n)
     {
         return n.substring(1,n.length()-1);
+    }
+    
+    private String getStorageFilename()
+    {
+        return Username+"."+threadSocket.getRemoteSocketAddress().toString().replaceAll("[^a-zA-Z0-9]+","_")+"."+name.split("\\.(?=[^\\.]+$)")[1];
     }
 }
