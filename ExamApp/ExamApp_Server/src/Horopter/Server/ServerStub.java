@@ -89,31 +89,39 @@ public class ServerStub implements ActionListener {
 
     private void terminateSocketService() {
         launch = false;
+        if (threadArray != null) {
+            try {
+                Iterator<FileThread> iter = threadArray.iterator();
+                while (iter.hasNext()) {
+                    FileThread fileThread = iter.next();
+                    fileThread.bufferedReader.close();
+                    fileThread.threadSocket.close();
+                    iter.remove();
+                }
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        if (socketArray != null) {
+            Iterator<Socket> iter = socketArray.iterator();
+            while (iter.hasNext()) {
+                Socket socket = iter.next();
+                try {
+                    if (socket != null) {
+                        socket.close();
+                    }
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                }
+                iter.remove();
+            }
+        }
         try {
             if (serverSocket != null) {
                 serverSocket.close();
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
-        }
-        if (threadArray != null) {
-            try {
-            Iterator<FileThread> iter = threadArray.iterator();
-            while (iter.hasNext()) {
-                FileThread fileThread = iter.next();
-                fileThread.bufferedReader.close();
-                fileThread.threadSocket.close();
-                iter.remove();
-            }
-            } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
-        }
-        if (socketArray != null) {
-            Iterator<Socket> iter = socketArray.iterator();
-            while (iter.hasNext()) {
-                iter.remove();
-            }
         }
         openFilesButton.setEnabled(true);
         portNumber.setEnabled(true);
@@ -173,7 +181,7 @@ public class ServerStub implements ActionListener {
 
         uploadLocation.setBounds(220, 20, 200, 30);
         portNumber.setBounds(220, 80, 200, 30);
-        startServer.setBounds(220, 150, 200, 30);        
+        startServer.setBounds(220, 150, 200, 30);
 
         userListScroll = new JScrollPane();
         userListScroll.setBounds(20, 20, 500, 300);
@@ -223,13 +231,7 @@ public class ServerStub implements ActionListener {
                     launch = true;
                     isServerOn = !isServerOn;
 
-                    int fileCount = directory.list().length;
-                    String[] fileNames = directory.list();
-
-                    Arrays.sort(fileNames);
-
-                    JList filesList = new JList<>(fileNames);
-                    fileListScroll.setViewportView(filesList);
+                    refreshFileListPanel();
 
                     launchServiceThread = new Thread() {
                         @Override
@@ -296,9 +298,22 @@ public class ServerStub implements ActionListener {
                 JList userList = new JList<>(Usernames.toArray());
                 userListScroll.setViewportView(userList);
             }
+
             if (frame != null) {
                 frame.revalidate();
                 frame.repaint();
+            }
+        }
+    }
+
+    private void refreshFileListPanel() {
+        if (uploadLocation != null && !"".equals(uploadLocation.getText())) {
+            File directory = new File(uploadLocation.getText());
+            String[] fileNames = directory.list();
+            Arrays.sort(fileNames);
+            JList filesList = new JList<>(fileNames);
+            if (fileListScroll != null) {
+                fileListScroll.setViewportView(filesList);
             }
         }
     }

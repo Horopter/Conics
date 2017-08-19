@@ -17,7 +17,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -226,6 +231,23 @@ class FileThread extends Thread {
     }
 
     private String getStorageFilename() {
-        return Username + "_" + MachineId +"_"+ threadSocket.getRemoteSocketAddress().toString().replaceAll("[^a-zA-Z0-9]+", "_") + "." + name.split("\\.(?=[^\\.]+$)")[1];
+        return Username + "_" + MachineId + "_" + getRemoteIPAddress(threadSocket.getRemoteSocketAddress()).replaceAll("[^a-zA-Z0-9\\.]","_") + "." + name.split("\\.(?=[^\\.]+$)")[1];
+    }
+
+    private String getRemoteIPAddress(SocketAddress socketAddress) {
+
+        if (socketAddress instanceof InetSocketAddress) {
+            InetAddress inetAddress = ((InetSocketAddress) socketAddress).getAddress();
+            if (inetAddress instanceof Inet4Address) {
+                return (inetAddress.toString());
+            } else if (inetAddress instanceof Inet6Address) {
+                return (inetAddress.toString());
+            } else {
+                System.err.println("Not an IP address.");
+            }
+        } else {
+            System.err.println("Not an internet protocol socket.");
+        }
+        return "error";
     }
 }

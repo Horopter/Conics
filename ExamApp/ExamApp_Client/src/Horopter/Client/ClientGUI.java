@@ -11,6 +11,8 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedInputStream;
@@ -24,12 +26,11 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.TreeSet;
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -38,11 +39,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileView;
+import javax.swing.text.View;
 
 /**
  *
@@ -64,7 +67,8 @@ public class ClientGUI implements ActionListener, MouseListener {
     JButton uploadButton, downloadButton;
     JProgressBar progressBar;
     JFileChooser fileChooser;
-    JButton openFilesButton;
+    JButton openFilesButton, clearArea;
+    JScrollPane scroll;
     Font titleFont, subtitleFont, statusFont;
     String[] fileNames = new String[1000]; //bottleneck on number of simultaneous file downloads
     String folderName;
@@ -79,9 +83,11 @@ public class ClientGUI implements ActionListener, MouseListener {
     TreeSet<String> selectedFilesList;
     Timer timer = new Timer(2000, this);
     ImageIcon icon;
+    JRadioButton EnableUploadOnly, EnableDownloadOnly;
+    ButtonGroup transferMode;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public ClientGUI(String username,String machineName, String _hostAddress, int _portNumber,String _folderName, ImageIcon imageIcon) {
+    public ClientGUI(String username, String machineName, String _hostAddress, int _portNumber, String _folderName, ImageIcon imageIcon) {
         Username = username;
         MachineId = machineName;
         folderName = _folderName;
@@ -89,11 +95,10 @@ public class ClientGUI implements ActionListener, MouseListener {
         portNumber = _portNumber;
         selectedFilesList = new TreeSet<>();
         icon = imageIcon;
-        prepareGUI();        
+        prepareGUI();
     }
 
-    private void prepareGUI()
-    {
+    private void prepareGUI() {
         timer.start();
         frame = new JFrame("Exam App");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -112,36 +117,36 @@ public class ClientGUI implements ActionListener, MouseListener {
         subtitleFont = new Font("Helvetica", Font.ITALIC, 18);
         subTitle = new JLabel("List of files to be transferred : ");
         subTitle.setFont(subtitleFont);
-        subTitle.setBounds(150, 90, 500, 30);
+        subTitle.setBounds(150, 140, 500, 30);
         frame.add(subTitle);
 
         textArea = new JTextArea();
         textArea.setEditable(false);
-        textArea.setBounds(170, 140, 500, 50);
+        textArea.setBounds(170, 190, 500, 50);
         scrollPaneForTextArea = new JScrollPane(textArea);
-        scrollPaneForTextArea.setBounds(160, 130, 520, 70);
+        scrollPaneForTextArea.setBounds(160, 180, 520, 70);
         frame.add(scrollPaneForTextArea);
 
         uploadButton = new JButton("Upload");
-        uploadButton.setBounds(200, 470, 100, 30);
+        uploadButton.setBounds(200, 520, 100, 30);
         frame.add(uploadButton);
 
         downloadButton = new JButton("Download");
-        downloadButton.setBounds(680, 470, 100, 30);
+        downloadButton.setBounds(680, 520, 100, 30);
         frame.add(downloadButton);
 
         statusFont = new Font("Arial", Font.PLAIN, 12);
         statusField = new JLabel("");
         statusField.setHorizontalAlignment(JLabel.CENTER);
         statusField.setFont(statusFont);
-        statusField.setBounds(250, 520, 500, 30);
+        statusField.setBounds(250, 570, 500, 30);
         frame.add(statusField);
 
         progressBar = new JProgressBar(0, 100);
         progressBar.setValue(0);
         progressBar.setMaximum(100);
         progressBar.setStringPainted(true);
-        progressBar.setBounds(240, 550, 500, 30);
+        progressBar.setBounds(240, 600, 500, 30);
         progressBar.setVisible(false);
         frame.add(progressBar);
 
@@ -152,57 +157,98 @@ public class ClientGUI implements ActionListener, MouseListener {
                 return new File(folderName).equals(f);
             }
         });
-        
+
+        clearArea = new JButton("Clear");
+        clearArea.setBounds(700, 220, 150, 30);
+        clearArea.addActionListener(this);
+        frame.add(clearArea);
+
         fileChooser.setMultiSelectionEnabled(false);
         disableButton(fileChooser, "FileChooser.homeFolderIcon");
         disableButton(fileChooser, "FileChooser.upFolderIcon");
         disableButton(fileChooser, "FileChooser.newFolderIcon");
         openFilesButton = new JButton("Select Files ...");
-        openFilesButton.setBounds(700, 140, 150, 30);
+        openFilesButton.setBounds(700, 180, 150, 30);
         openFilesButton.addActionListener(this);
         frame.add(openFilesButton);
 
         uploadButton.addActionListener(this);
         downloadButton.addActionListener(this);
-        try {
-            setClient();
-            printWriter.println(Username);
-            printWriter.println(MachineId);
-            printWriter.println("askDetails");
-            ObjectInputStream objectInputStream = new ObjectInputStream(serverDownloadStream);
-            fileCount = Integer.parseInt((String) objectInputStream.readObject());
 
-            String[] temp_names = new String[fileCount];
+        filesOnServer = new JLabel("Files in the Server Directory :");
+        filesOnServer.setBounds(150, 240, 400, 50);
+        frame.add(filesOnServer);
+        
+        scroll = new JScrollPane();
+        scroll.setBounds(325, 270, 400, 200);
+        frame.add(scroll);
 
-            for (int i = 0; i < fileCount; i++) {
-                String filename = (String) objectInputStream.readObject();
-                fileNames[i] = filename;
-                temp_names[i] = filename;
+        EnableUploadOnly = new JRadioButton("Upload Mode", true);
+        openFilesButton.setEnabled(true);
+        downloadButton.setEnabled(false);
+        uploadButton.setEnabled(true);
+        Component myview1 = scroll.getViewport().getView();
+        if(myview1!=null)
+            myview1.setEnabled(false);
+        EnableDownloadOnly = new JRadioButton("Download Mode");
+
+        EnableUploadOnly.setMnemonic(KeyEvent.VK_U);
+        EnableDownloadOnly.setMnemonic(KeyEvent.VK_D);
+
+        EnableUploadOnly.addItemListener((ItemEvent e) -> {
+            int State = e.getStateChange();
+            if (State == 1) {
+                openFilesButton.setEnabled(true);
+                downloadButton.setEnabled(false);
+                uploadButton.setEnabled(true);
+                Component myview3 = scroll.getViewport().getView();        
+                if(myview3!=null)            
+                    myview3.setEnabled(false);
+            } else {
+                openFilesButton.setEnabled(false);
+                downloadButton.setEnabled(true);
+                uploadButton.setEnabled(false);
+                Component myview2 = scroll.getViewport().getView();        
+                if(myview2!=null)            
+                    myview2.setEnabled(true);
             }
+        });
 
-            Arrays.sort(temp_names);
+        EnableDownloadOnly.addItemListener((ItemEvent e) -> {
+            int State = e.getStateChange();
+            if (State == 1) {
+                openFilesButton.setEnabled(false);
+                downloadButton.setEnabled(true);
+                uploadButton.setEnabled(false);
+                Component myview4 = scroll.getViewport().getView();        
+                if(myview4!=null)            
+                    myview4.setEnabled(true);
+            } else {
+                openFilesButton.setEnabled(true);
+                downloadButton.setEnabled(false);
+                uploadButton.setEnabled(true);
+                Component myview5 = scroll.getViewport().getView();        
+                if(myview5!=null)            
+                    myview5.setEnabled(false);
+            }
+        });
 
-            filesOnServer = new JLabel("Files in the Server Directory :");
-            filesOnServer.setBounds(150, 190, 400, 50);
-            frame.add(filesOnServer);
+        EnableUploadOnly.setBounds(355, 85, 200, 30);
+        EnableDownloadOnly.setBounds(570, 85, 200, 30);
 
-            filesList = new JList<>(temp_names);
-            JScrollPane scroll = new JScrollPane(filesList);
-            scroll.setBounds(325, 220, 400, 200);
+        frame.add(EnableUploadOnly);
+        frame.add(EnableDownloadOnly);
 
-            frame.add(scroll);
-            filesList.addMouseListener(this);
-            closeAll();
+        transferMode = new ButtonGroup();
+        transferMode.add(EnableUploadOnly);
+        transferMode.add(EnableDownloadOnly);
 
-        } catch (IOException | ClassNotFoundException | NumberFormatException e) {
-            e.printStackTrace();
-            statusField.setText("Remote Server refused to connect. Reopen the application and retry again.");
-            statusField.setBounds(250, 520, 500, 30);
-            frame.revalidate();
-        }
+        
+        askDetails();
+
         frame.setVisible(true);
     }
-    
+
     public final void setClient() throws IOException {
         clientSocket = new Socket(hostAddress, portNumber);
         serverDownloadStream = clientSocket.getInputStream();
@@ -219,22 +265,22 @@ public class ClientGUI implements ActionListener, MouseListener {
 
     //disabling components
     public static void disableButton(final Container c, final String iconString) {
-    int len = c.getComponentCount();
-    for (int i = 0; i < len; i++) {
-        Component comp = c.getComponent(i);
-        if (comp instanceof JButton) {
-            JButton b = (JButton) comp;
-            Icon icon = b.getIcon();
-            if (icon != null
-                    && icon == UIManager.getIcon(iconString)) {
-                b.setEnabled(false);
+        int len = c.getComponentCount();
+        for (int i = 0; i < len; i++) {
+            Component comp = c.getComponent(i);
+            if (comp instanceof JButton) {
+                JButton b = (JButton) comp;
+                Icon icon = b.getIcon();
+                if (icon != null
+                        && icon == UIManager.getIcon(iconString)) {
+                    b.setEnabled(false);
+                }
+            } else if (comp instanceof Container) {
+                disableButton((Container) comp, iconString);
             }
-        } else if (comp instanceof Container) {
-            disableButton((Container) comp, iconString);
         }
     }
-}
-    
+
     @Override
     public void mouseClicked(MouseEvent click) {
         if (click.getClickCount() == 2) {//select on double click
@@ -242,14 +288,14 @@ public class ClientGUI implements ActionListener, MouseListener {
             selectedFilesList.add(selectedItem);
             String resultString = "";
             String[] files = selectedFilesList.toArray(new String[selectedFilesList.size()]);
-            for(int i=0;i<files.length;i++)
-            {
-                if(i==0)
+            for (int i = 0; i < files.length; i++) {
+                if (i == 0) {
                     resultString = files[0];
-                else
+                } else {
                     resultString += "|" + files[i];
+                }
             }
-            textArea.setText(resultString);            
+            textArea.setText(resultString);
             frame.revalidate();
         }
     }
@@ -274,53 +320,49 @@ public class ClientGUI implements ActionListener, MouseListener {
         try {
             setClient();
             File directory = new File(folderName);
-
             if (!directory.exists()) {
                 directory.mkdir();
             }
             printWriter.println(Username);
             printWriter.println(MachineId);
-            printWriter.println("transferFile");  
-            
+            printWriter.println("transferFile");
+
             fileName = textArea.getText();
             String[] FileNamesList = fileName.split("\\|");
-            if(FileNamesList.length>1)
-            {
-                printWriter.println("multiple");                           
+            if (FileNamesList.length > 1) {
+                printWriter.println("multiple");
                 filePlaceholder = encodeFilename(fileName);
                 printWriter.println(filePlaceholder);
-                fileName = "zipmodule.zip"; 
+                fileName = "zipmodule.zip";
                 printWriter.println(encodeFilename(fileName));
-            }
-            else
-            {
+            } else {
                 printWriter.println("single");
                 filePlaceholder = encodeFilename(fileName);
                 printWriter.println(filePlaceholder);
             }
-                      
-                
-                ObjectInputStream objectInputStream = new ObjectInputStream(serverDownloadStream);
-                String resultString = (String) objectInputStream.readObject();
-                if (resultString.equals("Success")) {
-                    File file = new File(directory, fileName);
-                    try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-                        DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream);
-                        Long filesize = (Long) objectInputStream.readObject();
-                        receivePackets(filesize, dataOutputStream, file);
-                    } catch (NumberFormatException e) {
-                        e.printStackTrace();
-                        statusField.setText("Unexpected Server Response : " + e.getMessage());
-                        frame.revalidate();
-                    }
-                } else {
-                    statusField.setText("Requested file could not be found on the server.");
+
+            ObjectInputStream objectInputStream = new ObjectInputStream(serverDownloadStream);
+            String resultString = (String) objectInputStream.readObject();
+            if (resultString.equals("Success")) {
+                File file = new File(directory, fileName);
+                try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+                    DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream);
+                    Long filesize = (Long) objectInputStream.readObject();
+                    receivePackets(filesize, dataOutputStream, file);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    statusField.setText("Unexpected Server Response : " + e.getMessage());
                     frame.revalidate();
                 }
+            } else {
+                statusField.setText("Requested file could not be found on the server.");
+                frame.revalidate();
+            }
             closeAll();
+            askDetails();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-            statusField.setText("Remote Server refused connection. Reopen the application and retry again.");
+            statusField.setText("Remote Server refused to connect. Reopen the application and retry again.");
             frame.revalidate();
         }
     }
@@ -382,8 +424,9 @@ public class ClientGUI implements ActionListener, MouseListener {
 
             }
             closeAll();
+            askDetails();
         } catch (IOException e) {
-            statusField.setText("Remote server refused connection. Reopen the application and retry again.");
+            statusField.setText("Remote Server refused to connect. Reopen the application and retry again.");
             frame.revalidate();
             e.printStackTrace();
         }
@@ -418,14 +461,16 @@ public class ClientGUI implements ActionListener, MouseListener {
             };
             thread.start();
         } else if (event.getSource() == timer) {
-            if(progress == 0 && progressBar.isVisible() == true)
-            {
+            if (progress == 0 && progressBar.isVisible() == true && !"Remote Server refused to connect. Reopen the application and retry again.".equals(statusField.getText())) {
                 statusField.setText(" Counting, assembling and zipping your file(s). This might take a while. ");
             }
             frame.revalidate();
             frame.repaint();
         } else if (event.getSource() == openFilesButton) {
             onOpenFilesButtonClicked();
+        } else if (event.getSource() == clearArea) {
+            selectedFilesList = new TreeSet<>();
+            textArea.setText("");
         }
 
     }
@@ -460,8 +505,8 @@ public class ClientGUI implements ActionListener, MouseListener {
         } while (packetCounter != -1);
         statusField.setText("Completed.");
         progressBar.setValue(100);
-        uploadButton.setEnabled(true);
-        downloadButton.setEnabled(true);
+        uploadButton.setEnabled(EnableUploadOnly.isSelected());
+        downloadButton.setEnabled(EnableDownloadOnly.isSelected());
         textArea.setText("");
         frame.revalidate();
     }
@@ -483,20 +528,56 @@ public class ClientGUI implements ActionListener, MouseListener {
                 dataOutputStream.flush();
             }
             statusField.setText("Progress : " + progress + " bytes transferred out of " + filesize + " bytes.");
-            if(filesize == 0)
+            if (filesize == 0) {
                 progressBar.setValue(100);
-            else
+            } else {
                 progressBar.setValue(new BigDecimal(progress)
-                    .multiply(new BigDecimal(100))
-                    .divide(new BigDecimal(filesize)
-                            .setScale(0, RoundingMode.FLOOR), 2, RoundingMode.HALF_UP)
-                    .setScale(0, RoundingMode.FLOOR).intValue());
+                        .multiply(new BigDecimal(100))
+                        .divide(new BigDecimal(filesize)
+                                .setScale(0, RoundingMode.FLOOR), 2, RoundingMode.HALF_UP)
+                        .setScale(0, RoundingMode.FLOOR).intValue());
+            }
         }
         statusField.setText("Completed.");
         progressBar.setValue(100);
-        uploadButton.setEnabled(true);
-        downloadButton.setEnabled(true);
+        uploadButton.setEnabled(EnableUploadOnly.isSelected());
+        downloadButton.setEnabled(EnableDownloadOnly.isSelected());
         textArea.setText("");
         frame.revalidate();
+    }
+
+    private void askDetails() {
+        try {
+            setClient();
+            printWriter.println(Username);
+            printWriter.println(MachineId);
+            printWriter.println("askDetails");
+            ObjectInputStream objectInputStream = new ObjectInputStream(serverDownloadStream);
+            fileCount = Integer.parseInt((String) objectInputStream.readObject());
+
+            String[] temp_names = new String[fileCount];
+
+            for (int i = 0; i < fileCount; i++) {
+                String filename = (String) objectInputStream.readObject();
+                fileNames[i] = filename;
+                temp_names[i] = filename;
+            }
+            Arrays.sort(temp_names);
+            filesList = new JList<>(temp_names);
+            scroll.setViewportView(filesList);
+
+            frame.add(scroll);
+            filesList.addMouseListener(this);
+            if(null!=objectInputStream)
+            {
+                objectInputStream.close();
+            }
+            closeAll();
+
+        } catch (IOException | ClassNotFoundException | NumberFormatException e) {
+            e.printStackTrace();
+            statusField.setText("Remote Server refused to connect. Reopen the application and retry again.");
+            frame.revalidate();
+        }
     }
 }
