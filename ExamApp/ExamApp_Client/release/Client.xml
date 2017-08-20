@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>C:\Users\SantoshKumar\Documents\NetBeansProjects\ExamApp_Client\dist\ExamApp_Client.jar</jar>
+  <outfile>C:\Users\SantoshKumar\Documents\NetBeansProjects\ExamApp_Client\dist\Exam App Client.exe</outfile>
+  <errTitle>An error has occurred.</errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl>http://www.github.com/Horopter</supportUrl>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest></manifest>
+  <icon>C:\Users\SantoshKumar\Downloads\exam_ukE_icon.ico</icon>
+  <singleInstance>
+    <mutexName>ServerMutex</mutexName>
+    <windowTitle>Another instance ?</windowTitle>
+  </singleInstance>
+  <jre>
+    <path></path>
+    <bundledJre64Bit>false</bundledJre64Bit>
+    <bundledJreAsFallback>false</bundledJreAsFallback>
+    <minVersion>1.6.0</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+    <runtimeBits>64/32</runtimeBits>
+  </jre>
+  <versionInfo>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>1.0.RC1</txtFileVersion>
+    <fileDescription>Created as an assignment under BITS-Pilani</fileDescription>
+    <copyright>Horopter Inc. (Santosh Kumar Desai)</copyright>
+    <productVersion>1.0.0.0</productVersion>
+    <txtProductVersion>1.0.RC1</txtProductVersion>
+    <productName>Exam App Client</productName>
+    <companyName></companyName>
+    <internalName>File Client</internalName>
+    <originalFilename>Exam App Client.exe</originalFilename>
+    <trademarks></trademarks>
+    <language>ENGLISH_US</language>
+  </versionInfo>
+</launch4jConfig>

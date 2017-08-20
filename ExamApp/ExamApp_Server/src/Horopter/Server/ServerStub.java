@@ -132,7 +132,7 @@ public class ServerStub implements ActionListener {
         ServerStub serverStub = new ServerStub();
         serverStub.timer.start();
         try {
-            serverStub.prepareGUI("Control Options", "Show All Files", "Show Active Connections", new ImageIcon(ServerStub.class.getResource("exam.png")));
+            serverStub.prepareGUI("Control Options", "Show All Files", "Show Connections in this Session ", new ImageIcon(ServerStub.class.getResource("exam.png")));
         } catch (Exception e) {
             e.printStackTrace();
         }

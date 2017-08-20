@@ -31,7 +31,7 @@ import java.util.Arrays;
  * @author SantoshKumar
  */
 //<editor-fold defaultstate="collapsed" desc="File Upload and Download Thread.">
-class FileThread extends Thread {
+class FileThread extends Thread implements FileThreadInterface {
 //</editor-fold>
 
     int dataCounter = 0;
@@ -206,6 +206,7 @@ class FileThread extends Thread {
         } while (packetCounter != -1);
     }
 
+    @Override
     public void receivePackets(Long filesize, InputStream inputStream, DataOutputStream dataOutputStream, File file)
             throws IOException {
         progress = 0;
